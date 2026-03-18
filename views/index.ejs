@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <%- include('./partials/head') %>
+  <body>
+    <div class="container">
+      <h1>🚗 Sistema de Estacionamento</h1>
+      
+      <!-- Mensagens de feedback -->
+      <% if (mensagem) { %>
+        <div class="mensagem <%= tipo %>">
+          <%= mensagem %>
+        </div>
+      <% } %>
+
+      <!-- Formulário de cadastro -->
+      <div class="card">
+        <h2>📝 Entrada de Veículo</h2>
+        <form action="/veiculos/cadastrar" method="POST">
+          <div class="form-group">
+            <label for="placa">Placa:</label>
+            <input type="text" id="placa" name="placa" placeholder="ABC-1234" required>
+          </div>
+          <div class="form-group">
+            <label for="modelo">Modelo:</label>
+            <input type="text" id="modelo" name="modelo" placeholder="Ex: Honda Civic" required>
+          </div>
+          <div class="form-group">
+            <label for="cor">Cor:</label>
+            <input type="text" id="cor" name="cor" placeholder="Ex: Preto">
+          </div>
+          <button type="submit" class="btn btn-primary">Registrar Entrada</button>
+        </form>
+      </div>
+
+      <!-- Formulário de busca -->
+      <div class="card">
+        <h2>🔍 Buscar Veículo</h2>
+        <form action="/veiculos/buscar" method="GET">
+          <div class="form-group">
+            <label for="buscaPlaca">Placa:</label>
+            <input type="text" id="buscaPlaca" name="placa" placeholder="ABC-1234">
+            <button type="submit" class="btn btn-secondary">Buscar</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Lista de veículos estacionados -->
+      <div class="card">
+        <h2>🚙 Veículos Estacionados (<%= dados ? dados.length : 0 %>)</h2>
+        <a href="/historico" class="btn btn-info">Ver Histórico</a>
+        
+        <% if (dados && dados.length > 0) { %>
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Placa</th>
+                <th>Modelo</th>
+                <th>Cor</th>
+                <th>Data Entrada</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% dados.forEach(function(veiculo) { %>
+                <tr>
+                  <td><%= veiculo.id %></td>
+                  <td><strong><%= veiculo.placa %></strong></td>
+                  <td><%= veiculo.modelo %></td>
+                  <td><%= veiculo.cor || '-' %></td>
+                  <td><%= new Date(veiculo.data_entrada).toLocaleString('pt-BR') %></td>
+                  <td>
+                    <form action="/veiculos/<%= veiculo.id %>/saida?_method=PUT" method="POST" style="display:inline;">
+                      <button type="submit" class="btn btn-success" onclick="return confirm('Registrar saída do veículo <%= veiculo.placa %>?')">Registrar Saída</button>
+                    </form>
+                    <form action="/veiculos/<%= veiculo.id %>?_method=DELETE" method="POST" style="display:inline;">
+                      <button type="submit" class="btn btn-danger" onclick="return confirm('Tem certeza que deseja excluir este veículo?')">Excluir</button>
+                    </form>
+                  </td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        <% } else { %>
+          <p class="info">Nenhum veículo estacionado no momento.</p>
+        <% } %>
+      </div>
+
+      <!-- Histórico (se estiver na página de histórico) -->
+      <% if (historico) { %>
+        <div class="card">
+          <h2>📊 Histórico de Estacionamento</h2>
+          <a href="/" class="btn btn-secondary">Voltar</a>
+          
+          <% if (dados && dados.length > 0) { %>
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Placa</th>
+                  <th>Modelo</th>
+                  <th>Cor</th>
+                  <th>Data Entrada</th>
+                  <th>Data Saída</th>
+                  <th>Valor</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% dados.forEach(function(veiculo) { %>
+                  <tr>
+                    <td><%= veiculo.id %></td>
+                    <td><strong><%= veiculo.placa %></strong></td>
+                    <td><%= veiculo.modelo %></td>
+                    <td><%= veiculo.cor || '-' %></td>
+                    <td><%= new Date(veiculo.data_entrada).toLocaleString('pt-BR') %></td>
+                    <td><%= new Date(veiculo.data_saida).toLocaleString('pt-BR') %></td>
+                    <td><strong>R$ <%= parseFloat(veiculo.valor).toFixed(2) %></strong></td>
+                  </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          <% } else { %>
+            <p class="info">Nenhum registro no histórico.</p>
+          <% } %>
+        </div>
+      <% } %>
+    </div>
+  </body>
+</html>
+
